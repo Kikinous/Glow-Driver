@@ -1,0 +1,69 @@
+/*
+   Julien Borghetti - March 2016
+   Revision Avril 2016 - eagle file: Mono_rev1_GlowDriver.sch
+
+   Programmed for an attiny85
+   1MHz internal clock
+   - read PIN_RECEIVER signal to turn ON/OFF the glow plug
+   - ADC of sensed current
+   - I2C to main MCU
+   */
+
+
+#include "TinyWireS.h"          // "ATTiny85 @ 1Mhz" pour la librairie.
+//http://kasey.fr/ATTiny-capteur-universel-en-I2C.html
+
+#define I2C_SLAVE_ADDR  0x26    // On note l'adresse I2C
+#define PIN_LED  3   
+#define PIN_REGULATOR 2   
+#define PIN_RECEIVER 4   
+
+byte byteRcvd;
+boolean driving_glow = false;
+
+void setup()  {
+    pinMode(PIN_LED       , OUTPUT);
+    pinMode(PIN_REGULATOR , OUTPUT);
+    pinMode(PIN_RECEIVER  , INPUT);
+
+    digitalWrite(PIN_LED, LOW);
+
+    TinyWireS.begin(I2C_SLAVE_ADDR);      // on rejoint le bus avec une adresse d'esclave (similaire a la lib wire)
+    byteRcvd = 0;
+}
+
+
+void loop(){
+    unsigned long duration;
+    duration = pulseIn(PIN_RECEIVER, HIGH);
+
+    if(duration < 1500){
+        driving_glow = true;
+        digitalWrite(PIN_REGULATOR, LOW);  
+        digitalWrite(PIN_LED, HIGH);  
+    }
+    else{
+        driving_glow = false;
+        digitalWrite(PIN_REGULATOR, HIGH);
+        digitalWrite(PIN_LED, LOW);
+    }
+
+    if (TinyWireS.available()){         // si on revoit quelque chose sur le bus I2C
+        byteRcvd = TinyWireS.receive(); // on l'enregistre
+        Blink();                        // on blink un coup pour montrer que l'on est content
+    }
+}
+
+void Blink() {                          // blinker du pauvre :)
+    if(driving_glow == false){
+        digitalWrite(PIN_LED,HIGH);
+        delay(100);
+        digitalWrite(PIN_LED,LOW);
+    }
+    else{
+        digitalWrite(PIN_LED,LOW);
+        delay(100);
+        digitalWrite(PIN_LED,HIGH);
+    }
+    
+}
