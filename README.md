@@ -10,4 +10,4 @@ Blog thread: http://www.eevblog.com/forum/projects/improving-glow-plug-drive-des
 * attiny code
 
 
-![alt tag](https://raw.githubusercontent.com/Kikinous/Glow-Driver/master/doc/IMG_2166.JPG)
+![alt tag](https://github.com/Kikinous/Glow-Driver/blob/master/doc/IMG_2166.JPG?raw=true)
