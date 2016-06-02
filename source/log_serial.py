@@ -1,5 +1,10 @@
 #!/usr/bin/env python
 
+'''
+Log data from rc model aircraft "Flight Instruments hardware/software"
+Copyright julien Borghetti 2016
+'''
+
 # Imports
 import time
 import serial
@@ -28,7 +33,7 @@ ser.writeTimeout = 2     #timeout for write
 
 response = "STDOUT:\n "
 
-try: 
+try:
     ser.open()
 except Exception, e:
     print "error open serial port: " + str(e)
@@ -37,7 +42,7 @@ except Exception, e:
 if ser.isOpen():
     try:
         ser.flushInput()  #flush input buffer, discarding all its contents
-        ser.flushOutput() #flush output buffer, aborting current output 
+        ser.flushOutput() #flush output buffer, aborting current output
                           #and discard all that is in buffer
         #write data
         #ser.write("AT+CSQ")
@@ -57,11 +62,12 @@ if ser.isOpen():
                 matchObj = re.match( r'(Current)|(Temperature)', response1, re.I|re.X)
                 if not matchObj:
                     sys.stdout.write(response1)
-                    response = response + response1 
+                    response = response + response1
                 matchObj = re.match( r'(Current)|(Temperature)', response2, re.I|re.X)
                 if not matchObj:
                     sys.stdout.write(response2)
-                    response = response + response2 
+
+                    response = response + response2
             #time.sleep(1)   #give the serial port sometime to receive the data
         ser.close()
     except Exception, e1:
