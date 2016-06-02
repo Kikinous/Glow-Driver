@@ -1,3 +1,19 @@
+/*
+    Julien Borghetti - March 2016
+    Revision Avril 2016
+
+    Programmed for an ATMEGA328P
+    BOARD picture:
+    https://raw.githubusercontent.com/Kikinous/Glow-Driver/master/doc/main-board-atmega328.jpg
+
+    - Measure temperature (thermistor & ADC & curve fit)
+    - write data in SD card
+    - send data over bluetooth BLE
+    - print data to nokia 5110
+    - switch LED red, green, blue when the data is respectivly low, good, high
+    - current sensor doesn't work yet
+*/
+
 // ACTIVATE DEBUG MESSAGES & TEST CODE
 #define DEBUG
 #ifdef DEBUG
@@ -17,7 +33,7 @@ Sd2Card card;
 SdVolume volume;
 SdFile root;
 File myFile;
-#define SDcardCHIPSELECT 2 //PD2 is free in Radial3_rev1 eagle 
+#define SDcardCHIPSELECT 2 //PD2 is free in Radial3_rev1 eagle
 char filename[] = "LOGGER00.csv";
 
 
@@ -33,19 +49,19 @@ PCD8544_SPI lcd;
 
 
 // VARISTOR voltage divider and coefficients (check curve fitting python script)
-#define SERIESRESISTOR 4630    
-#define THERMISTORNOMINAL 10000 
+#define SERIESRESISTOR 4630
+#define THERMISTORNOMINAL 10000
 #define BCOEFFICIENT 4005.58
-#define TEMPERATURENOMINAL 298.26 
-#define THERMISTORPIN A3 
+#define TEMPERATURENOMINAL 298.26
+#define THERMISTORPIN A3
 #define THERMISTOR_LOW_THRESHOLD 27.0   // Celcius
 #define THERMISTOR_HIGH_THRESHOLD 29.0  // Celcius
 
 
 // CURRENT SENSOR
-#define CURRENTSENSORPIN A0 
-#define COEFFICIENT_mVperAmp 185 
-#define COEFFICIENT_ACSoffset 2500 
+#define CURRENTSENSORPIN A0
+#define COEFFICIENT_mVperAmp 185
+#define COEFFICIENT_ACSoffset 2500
 
 
 // SHIFT REGISTER
@@ -57,7 +73,7 @@ PCD8544_SPI lcd;
 // LOOP TIMING
 #define LOOP_TIMING_ADC 500
 unsigned long millis_ADC = 0;
-#define LOOP_TIMING_SDcard 1000 
+#define LOOP_TIMING_SDcard 1000
 unsigned long millis_SDcard = 0;
 
 
@@ -74,8 +90,8 @@ float courant     = 0;
 
 
 void setup() {
-      
-    //Display 
+
+    //Display
     lcd.begin(); // 14X6 characters
     //           01234567890123
     lcd.print(F("              "));
@@ -85,19 +101,19 @@ void setup() {
 
     // SHIFT REGISTER
     pinMode(HC595_latchPin, OUTPUT);
-    pinMode(HC595_dataPin, OUTPUT);  
+    pinMode(HC595_dataPin, OUTPUT);
     pinMode(HC595_clockPin, OUTPUT);
     registerWrite(1,LOW);
-    delay(1000);   
-      
+    delay(1000);
+
     // SIGNIFY DEBUG MODE
 #ifdef DEBUG
     for (int i=0; i <= 9; i++){
         registerWrite(1,HIGH);
-        delay(100);   
+        delay(100);
         registerWrite(1,LOW);
-        delay(100);   
-    } 
+        delay(100);
+    }
 #endif
 
     // UART
@@ -131,7 +147,7 @@ void loop() {
         //message.toCharArray(message_lcd,84);
         lcd.clear();
         lcd.print(message);
-        Serial.println(message); 
+        Serial.println(message);
 
         Etat_bougie = set_LED_indicator(Etat_bougie,temperature);
     }
@@ -143,7 +159,7 @@ void loop() {
             myFile.print(",");
             myFile.println(temperature);
             myFile.close();
-        }    
+        }
     }
 }
 
@@ -157,9 +173,9 @@ void loop() {
 
 void SDcard_init(){
     // On the Ethernet Shield, CS is pin 4. It's set as an output by default.
-    // Note that even if it's not used as the CS pin, the hardware SS pin 
-    // (10 on most Arduino boards, 53 on the Mega) must be left as an output 
-    // or the SD library functions will not work. 
+    // Note that even if it's not used as the CS pin, the hardware SS pin
+    // (10 on most Arduino boards, 53 on the Mega) must be left as an output
+    // or the SD library functions will not work.
     //pinMode(10, OUTPUT);
     if (!SD.begin(SDcardCHIPSELECT)) Serial.println("SD Card initialization failed!");
     // create a new file
@@ -168,7 +184,7 @@ void SDcard_init(){
         filename[7] = i%10 + '0';
         if (! SD.exists(filename)) {
             // only open a new file if it doesn't exist
-            myFile = SD.open(filename, FILE_WRITE); 
+            myFile = SD.open(filename, FILE_WRITE);
             break;  // leave the loop!
         }
     }
